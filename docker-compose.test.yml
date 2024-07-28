@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+      - MONGO_INITDB_DATABASE=testdb
+
+  test-runner:
+    image: node:14
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    environment:
+      - MONGO_TEST_URI=mongodb://root:example@mongodb:27017/testdb?authSource=admin
+    depends_on:
+      - mongodb
+    command: >
+      sh -c "
+        npm install &&
+        npm run test
+      "
