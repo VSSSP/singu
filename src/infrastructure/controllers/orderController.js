@@ -1,28 +1,61 @@
-const orderService = require('../../application/orderService');
+const Order = require('../../domain/models/order');
+const {
+    orderSchema,
+    updateStatusSchema
+} = require('../../domain/validators/orderValidator');
 
-exports.createOrder = async (req, res) => {
-    try {
-        const order = await orderService.createOrder(req.body);
+class OrderController {
+    async createOrder(req, res) {
+        const {
+            error
+        } = orderSchema.validate(req.body);
+        if (error) {
+            return res.status(400).send({
+                message: error.details[0].message
+            });
+        }
+        const {
+            items
+        } = req.body;
+        const order = new Order({
+            items
+        });
+        await order.save();
         res.status(201).send(order);
-    } catch (error) {
-        res.status(400).send(error.message);
     }
-};
 
-exports.getOrders = async (req, res) => {
-    try {
-        const orders = await orderService.getOrders();
+    async getOrders(req, res) {
+        const orders = await Order.find();
         res.status(200).send(orders);
-    } catch (error) {
-        res.status(500).send(error.message);
     }
-};
 
-exports.updateOrderStatus = async (req, res) => {
-    try {
-        const order = await orderService.updateOrderStatus(req.params.id, req.body.status);
+    async updateOrderStatus(req, res) {
+        const {
+            error
+        } = updateStatusSchema.validate(req.body);
+        if (error) {
+            return res.status(400).send({
+                message: error.details[0].message
+            });
+        }
+        const {
+            id
+        } = req.params;
+        const {
+            status
+        } = req.body;
+        const order = await Order.findOne({
+            orderId: id
+        });
+        if (!order) {
+            return res.status(404).send({
+                message: 'Order not found'
+            });
+        }
+        order.status = status;
+        await order.save();
         res.status(200).send(order);
-    } catch (error) {
-        res.status(400).send(error.message);
     }
-};
+}
+
+module.exports = new OrderController();

@@ -54,23 +54,23 @@ describe('Order API', () => {
     it('should update order status', async () => {
         const order = new Order({
             items: ['item1'],
-            status: 'pending'
+            status: 'PENDING'
         });
         await order.save();
 
         const res = await request(app)
             .put(`/api/orders/${order.orderId}/status`)
             .send({
-                status: 'ready'
+                status: 'READY'
             });
         expect(res.statusCode).toEqual(200);
-        expect(res.body.status).toEqual('ready');
+        expect(res.body.status).toEqual('READY');
     });
 
     it('should not update order status with invalid data', async () => {
         const order = new Order({
             items: ['item1'],
-            status: 'pending'
+            status: 'PENDING'
         });
         await order.save();
 
