@@ -12,10 +12,3 @@ services:
     image: mongo:4.2
     ports:
       - "27017:27017"
-  test-runner:
-    build: .
-    command: npm test
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/orders
-    depends_on:
-      - mongo

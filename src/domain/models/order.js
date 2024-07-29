@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const {
-    v4: uuidv4
-} = require('uuid');
+const crypto = require('crypto');
+
 
 const orderSchema = new mongoose.Schema({
     orderId: {
@@ -19,11 +18,19 @@ const orderSchema = new mongoose.Schema({
     }
 });
 
+function generateAlphanumeric(length) {
+    return crypto.randomBytes(length)
+        .toString('base64')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .slice(0, length);
+}
+
 orderSchema.pre('save', function (next) {
     if (this.isNew) {
         const itemNameString = this.items.join('-');
-        const uniqueId = uuidv4();
-        this.orderId = `${itemNameString}-${uniqueId}`;
+        const randomNumber = Math.round(Math.random() * 1000000); // Generates a random number
+        const alphanumeric = generateAlphanumeric(6); // Generates a 6 character alphanumeric string
+        this.orderId = `${itemNameString}-${randomNumber}-${alphanumeric}`;
     }
     next();
 });
